@@ -1,0 +1,87 @@
+
+import os
+import argparse
+
+#command line parsing
+parser = argparse.ArgumentParser(description='Produce metrics on OpenAddresses data.')
+parser.add_argument('input', help= 'The OpenAddresses Folder, add a \ to the end of it.')
+parser.add_argument('output', help= 'The file that data will be written into.')
+parser.add_argument('-g', '--good', type=str, help = 'define a file to output rows with street and address')
+parser.add_argument('-c', '--city', type=str, help = 'define a file to output rows with city')
+parser.add_argument('-z', '--zip', type=str, help = 'define a file to output rows with zip')
+parser.add_argument('-b', '--both', type=str, help = 'define a file to output rows with city and zip')
+args = parser.parse_args()
+
+
+def check_validity(l_split): #checks if a row is good
+	if len(l_split) >= 8 and l_split[0] and l_split[1] and l_split[2] and l_split[3] and \
+	'"' not in l_split[2] and '"' not in l_split[3] and parsed[0].lower() != 'lon' and any(i.isdigit() for i in l_split[2]) == True:
+		if l_split[2].isdigit() == True: #if num is a digit check that it is greater than 0
+			if int(l_split[2]) > 0:
+				return True
+			else: return False
+		else: return True
+	else: return False
+
+def mylistdir(directory): #returns list of files minus apple metadata files
+    """A specialized version of os.listdir() that ignores files that
+    start with a leading period."""
+    filelist = os.listdir(directory)
+    return [x for x in filelist
+            if not (x.startswith('.'))]
+
+def is_number(string): #returns whether a string can be converted into a number
+	if string = '': return False
+	else: return all(val.isdigit() or val == '-' and inx == 0 for inx, val in enumerate(string))
+
+output = open(args.output, 'a') 
+if args.good: f_good = open(args.good, 'w')
+if args.city: f_city = open(args.city, 'w')
+if args.zip: f_zip = open(args.zip, 'w')
+if args.both: f_both = open(args.both, 'w')
+for state in mylistdir(args.input): #loop through states
+	print(state)
+	state_dir = args.input + state
+	output.write(state +  '\n')
+	for region in mylistdir(state_dir): #loop through the files in state folders
+		if region.endswith('.csv'):
+			region_dir = state_dir + '//' + region
+			with open(region_dir, 'r') as file:
+				lines = good = city = zip = both = parsing = po = nine = full = 0
+				for line in file: #loop through lines in the file
+					lines += 1
+					parsed = line.split(',')
+					if '"' in line: parsing += 1
+					elif len(parsed) != 9: full += 1
+					elif parsed[2] and parsed[2] != 'NUMBER' and any(i.isdigit() for i in parsed[2]) != True: po += 1
+					elif is_number(parsed[2]) == True and int(parsed[2]) < 0: nine += 1
+					elif check_validity(parsed) == True:
+						good += 1
+						if args.good:
+							row = parsed[2] + ' ' + parsed[3] + ' ' + state + '\n'
+							f_both.write(row)
+						if parsed[4] and '"' not in parsed[4]: 
+							city += 1
+							if args.city:								
+								row = parsed[2] + ' ' + parsed[3] + ' ' + parsed[4] + ' ' + state + '\n'
+								f_both.write(row)
+						if parsed[7] and '"' not in parsed[7]: 
+							zip += 1
+							if args.zip:								
+								row = parsed[2] + ' ' + parsed[3] + ' ' + state + ' ' + parsed[7] + '\n'
+								f_both.write(row)
+						if parsed[4] and parsed[7] and '"' not in parsed[4] and '"' not in parsed[7]: 
+							both += 1
+							if args.both: 
+								row = parsed[0] + ',' + parsed[1] + ',' + parsed[2] + ' ' + parsed[3] + ' ' + parsed[4] + ' ' + state + ' ' + parsed[7] + '\n'
+								f_both.write(row) 
+				output.write(region + ',' + str(lines) + ',' + str(good) + ',' + str(city) + ',' + str(zip) + ',' + str(both) \
+				+ ',' + str(parsing) + ',' + str(po) + ',' + str(nine) + ',' + str(full) + '\n')
+
+output.close
+if args.good: f_good.close
+if args.city: f_city.close
+if args.zip: f_zip.close
+if args.both: f_both.close
+
+#factorial streets
