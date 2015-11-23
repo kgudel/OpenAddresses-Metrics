@@ -2,7 +2,7 @@
 
 This respository contains a python file that runs from the command line.
 
-It takes as input a regional OpenAddresses zip file, you have to point it at the folder \us\ in the folder and include a \ at the end of the path, and a .csv file which it will write data into.
+It takes as input a regional OpenAddresses zip file, you have to point it at the folder \us\, and a .csv file which it will write data into.
 
 It then writes 10 fields into that file:
 
