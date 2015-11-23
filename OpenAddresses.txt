@@ -4,85 +4,91 @@ import argparse
 
 #command line parsing
 parser = argparse.ArgumentParser(description='Produce metrics on OpenAddresses data.')
-parser.add_argument('input', help= 'The OpenAddresses Folder, add a \ to the end of it.')
+parser.add_argument('input', help= 'The OpenAddresses Folder')
 parser.add_argument('output', help= 'The file that data will be written into.')
-parser.add_argument('-g', '--good', type=str, help = 'define a file to output rows with street and address')
-parser.add_argument('-c', '--city', type=str, help = 'define a file to output rows with city')
-parser.add_argument('-z', '--zip', type=str, help = 'define a file to output rows with zip')
-parser.add_argument('-b', '--both', type=str, help = 'define a file to output rows with city and zip')
+parser.add_argument('-s', '--summary', type =str, help = 'define a file to output state by state summary')
 args = parser.parse_args()
 
 
 def check_validity(l_split):
-    """checks if a row is good i.e. that it contains a valid lat, lon, number, and street. Also 
-        checks if there are quotation marks as a proxy for parsing issues and whether the number has
-        and y digits as a proxy for parsing an bad data issues"""
-    if len(l_split) >= 8 and l_split[0] and l_split[1] and l_split[2] and l_split[3] and \
+	#checks if a row is good i.e. that it contains a valid lat, lon, number, and street. Also 
+    #checks if there are quotation marks as a proxy for parsing issues and whether the number has
+    #any digits as a proxy for parsing an bad data issues
+	if len(l_split) >= 8 and l_split[0] and l_split[1] and l_split[2] and l_split[3] and \
 	'"' not in l_split[2] and '"' not in l_split[3] and parsed[0].lower() != 'lon' and any(i.isdigit() for i in l_split[2]) == True:
 		if l_split[2].isdigit() == True: #if num is a digit check that it is greater than 0
-			if int(l_split[2]) > 0:
-				return True
+			if int(l_split[2]) > 0: return True
 			else: return False
 		else: return True
 	else: return False
 
 def mylistdir(directory):
-    """A specialized version of os.listdir() that ignores files that
-    start with a leading period."""
+    #A specialized version of os.listdir() that ignores files that start with a leading period."""
     filelist = os.listdir(directory)
-    return [x for x in filelist
-            if not (x.startswith('.'))]
+    return [x for x in filelist if not (x.startswith('.'))]
 
-def is_number(string)
-    """Returns whether a string can be converted into a number, intended only for address strings"""
-	if string = '': return False
+def is_number(string):
+    #Returns whether a string can be converted into a number, intended only for address strings
+	if string == '': return False
 	else: return all(val.isdigit() or val == '-' and inx == 0 for inx, val in enumerate(string))
 
+if args.summary: f_summary = open(args.summary, 'a')
 output = open(args.output, 'a') 
-if args.good: f_good = open(args.good, 'w')
-if args.city: f_city = open(args.city, 'w')
-if args.zip: f_zip = open(args.zip, 'w')
-if args.both: f_both = open(args.both, 'w')
 for state in mylistdir(args.input): #loop through states folders
-    print(state) #just to record progress in the terminal
-    state_dir = args.input + state #make the state file path
+	print(state) #just to record progress in the terminal
+	if args.input.endswith('//'): state_dir = args.input + state #make the state file path
+	else: state_dir = args.input + '//' + state #make the state file path
+	if args.summary: st_statewide = st_st_city = st_st_zip = st_st_both = 0
+	if args.summary: st_other = st_o_city = st_o_zip = st_o_both = 0
 	output.write(state +  '\n')
-	for region in mylistdir(state_dir): #loop through the files in state folders
+    	for region in mylistdir(state_dir): #loop through the files in state folders
 		if region.endswith('.csv'):
-            region_dir = state_dir + '//' + region #make the region file path
+			region_dir = state_dir + '//' + region #make the region file path
 			with open(region_dir, 'r') as file:
 				lines = good = city = zip = both = parsing = po = nine = full = 0
 				for line in file: #loop through lines in the file
-                    lines += 1 #counting total lines
+					lines += 1 #counting total lines
 					parsed = line.split(',')
-                    if '"' in line: parsing += 1 #counting rows with quotation marks
-                        elif len(parsed) != 9: full += 1 #counting rows missing fields
-                    elif parsed[2] and parsed[2] != 'NUMBER' and any(i.isdigit() for i in parsed[2]) != True: po += 1 #counting rows with digits in the number
-                    elif is_number(parsed[2]) == True and int(parsed[2]) < 0: nine += 1 #rows with a negative number in the number
+					if '"' in line: parsing += 1 #counting rows with quotation marks
+					elif len(parsed) != 9: full += 1 #counting rows missing fields
+					elif parsed[2] and parsed[2] != 'NUMBER' and any(i.isdigit() for i in parsed[2]) != True: po += 1 #counting rows with digits in the number
+					elif is_number(parsed[2]) == True and int(parsed[2]) < 0: nine += 1 #rows with a negative number in the number
 					elif check_validity(parsed) == True:
-                        good += 1 #counting good rows
-						if args.good:
-							row = parsed[2] + ' ' + parsed[3] + ' ' + state + '\n'
-							f_both.write(row)
+						good += 1 #counting good rows
 						if parsed[4] and '"' not in parsed[4]: 
-                            city += 1 #counting rows with a city
-							if args.city:								
-								row = parsed[2] + ' ' + parsed[3] + ' ' + parsed[4] + ' ' + state + '\n'
-								f_both.write(row)
+							city += 1 #counting rows with a city
 						if parsed[7] and '"' not in parsed[7]: 
-                            zip += 1 #counting rows with a zip
-							if args.zip:								
-								row = parsed[2] + ' ' + parsed[3] + ' ' + state + ' ' + parsed[7] + '\n'
-								f_both.write(row)
+							zip += 1 #counting rows with a zip
 						if parsed[4] and parsed[7] and '"' not in parsed[4] and '"' not in parsed[7]: 
-                            both += 1 #counting rows with city and zip
-							if args.both: 
-								row = parsed[0] + ',' + parsed[1] + ',' + parsed[2] + ' ' + parsed[3] + ' ' + parsed[4] + ' ' + state + ' ' + parsed[7] + '\n'
-								f_both.write(row) 
+							both += 1 #counting rows with city and zip 
 				output.write(region + ',' + str(lines) + ',' + str(good) + ',' + str(city) + ',' + str(zip) + ',' + str(both) + ',' + str(parsing) + ',' + str(po) + ',' + str(nine) + ',' + str(full) + '\n')
+				if args.summary:
+					#recording data about statewide files
+					if region.lower() == 'statewide.csv' or region.lower() == '_loveland.csv':
+						st_statewide += good
+						st_st_city += city
+						st_st_zip += zip
+						st_st_both += both
+					#recording data about non-statewide files
+					else:
+						st_other += good
+						st_o_city += city
+						st_o_zip += zip
+						st_o_both += both
+	if args.summary:
+		#create list to join and write into summary file
+		summary = [state, str(st_statewide), str(st_other)]
+		#choose largest of statewide and other for city
+		if st_st_city > st_o_city: summary.append(str(st_st_city))
+		else: summary.append(str(st_o_city))
+		#choose largest of statewide and other for zip
+		if st_st_zip > st_o_zip: summary.append(str(st_st_zip))
+		else: summary.append(str(st_o_zip))
+		#choose largest of statewide and other for both
+		if st_st_both > st_o_both: summary.append(str(st_st_both))
+		else: summary.append(str(st_o_both))
+		summary.append('\n')
+		f_summary.write(','.join(summary))
 
 output.close
-if args.good: f_good.close
-if args.city: f_city.close
-if args.zip: f_zip.close
-if args.both: f_both.close
+if args.summary: f_summary.close
