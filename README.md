@@ -17,18 +17,10 @@ It then writes 10 fields into that file:
 9. '-9s': The number of rows in the file with a negative number in the number field
 10. Missing Fields: The number of rows in the file with fewer than 9 fields.
 
-This file also has 4 optional outputs each of which require an output file if they are choosen to run.
+This file also has 1 optional output: Summary ('-s', '--summary'). If the summary flag is turned out the file takes another file as input, where the summary data will be written. It then returns:
 
-1. -g: Outputs all good rows
-2. -c: Outputs all good rows with a city
-3. -z: Outputs all good rows with a zip code
-4. -b: Outputs all good rows with a city and a zip code
-
-Each of these outputs include 6 rows:
-
-1. Lat
-2. Lon
-3. Number
-4. Street
-5. City
-6. Zip
+1. The number of good rows in a statewide file
+2. The number of good rows in other files
+3. The number of good rows with zips in either statewide or other rows, choosing the one with the most good rows with zips
+4. The number of good rows with cities in either statewide or other rows, choosing the one with the most good rows with cities
+5. The number of good rows with zips and cities in either statewide or other rows, choosing the one with the most good rows with zips and cities
