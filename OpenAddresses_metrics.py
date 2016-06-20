@@ -64,8 +64,11 @@ def incomplete_zip(list):
 	if len(list) >= 8 and list[7] and len(list[7]) < 5: return True
 	else: return False
 
-if args.summary: f_summary = open(args.summary, 'a')
-output = open(args.output, 'a') 
+if args.summary: 
+	f_summary = open(args.summary, 'w')
+	f_summary.write("state,good statewide,good other files,good with zip,source,good with city,source,good with both,source\n")
+output = open(args.output, 'w')
+output.write("region,lines,good,city,zip,both,parsing,PO,nine,not complete,bad zip\n")
 for state in mylistdir(args.input): #loop through states folders
 	print(state) #just to record progress in the terminal
 	if args.input.endswith('//'): state_dir = args.input + state #make the state file path
