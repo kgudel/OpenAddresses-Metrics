@@ -16,6 +16,7 @@ It then writes 10 fields into that file:
 8. 'PO': The number of rows in the file  with no digits in the number field as a proxy for parsing and data problems.
 9. '-9s': The number of rows in the file with a negative number in the number field
 10. Missing Fields: The number of rows in the file with fewer than 9 fields.
+11. Bad Zip: The number of rows in the file that have a zipcode with fewer than five digits.
 
 This file also has 1 optional output: Summary ('-s', '--summary'). If the summary flag is turned out the file takes another file as input, where the summary data will be written. It then returns:
 
