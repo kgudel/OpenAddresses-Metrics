@@ -4,6 +4,9 @@ This respository contains a python file that runs from the command line.
 
 It takes as input a regional OpenAddresses zip file, you have to point it at the folder \us\, and a .csv file which it will write data into.
 
+For example:
+`python OpenAddresses_metrics.py openaddr-collected-us_northeast/us/ data.csv -s summary.csv`
+
 It then writes 10 fields into that file:
 
 1. State: The state abbreviation or file name
