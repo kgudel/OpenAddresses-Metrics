@@ -5,7 +5,7 @@ This respository contains a python file that runs from the command line.
 It takes as input a regional OpenAddresses zip file, you have to point it at the folder \us\, and a .csv file which it will write data into.
 
 For example:
-`python OpenAddresses_metrics.py openaddr-collected-us_northeast/us/ data.csv -s summary.csv`
+`python OpenAddresses_metrics.py openaddr-collected-us_northeast/us/ data.csv`
 
 It then writes 10 fields into that file:
 
@@ -21,7 +21,7 @@ It then writes 10 fields into that file:
 10. Missing Fields: The number of rows in the file with fewer than 9 fields.
 11. Bad Zip: The number of rows in the file that have a zipcode with fewer than five digits.
 
-This file also has 1 optional output: Summary ('-s', '--summary'). If the summary flag is turned out the file takes another file as input, where the summary data will be written. It then returns:
+This file also has 1 optional output: Summary ('-s', '--summary'). If the summary flag is turned on the file takes another file as input, where the summary data will be written. It then returns:
 
 1. The number of good rows in a statewide file
 2. The number of good rows in other files
