@@ -60,6 +60,10 @@ def has_negative_number(list):
 	if len(list) >= 4 and line[2] and is_number(line[2]) and int(line[2]) < 0: return True
 	else: return False
 
+def incomplete_zip(list):
+	if len(list) >= 8 and list[7] and len(list[7]) < 5: return True
+	else: return False
+
 if args.summary: f_summary = open(args.summary, 'a')
 output = open(args.output, 'a') 
 for state in mylistdir(args.input): #loop through states folders
@@ -73,7 +77,7 @@ for state in mylistdir(args.input): #loop through states folders
 			region_dir = state_dir + '//' + region #make the region file path
 			with open(region_dir, 'r') as file:
 				all_lines = [line.split(',') for line in file]
-			lines = len(all_lines) #count total lines
+			lines = len(all_lines) - 1#count total lines
 			good_lines = filter(check_validity, all_lines)
 			good = len(good_lines) #counting good lines
 			city = len(filter(has_city, good_lines))
@@ -82,8 +86,9 @@ for state in mylistdir(args.input): #loop through states folders
 			parsing = len(filter(has_quotes, all_lines))
 			full = len(filter(missing_rows, all_lines))
 			po = len(filter(no_digit_in_number, all_lines))
-			nine = len(filter(has_negative_number, all_lines))	
-			output.write(','.join([region, str(lines), str(good), str(city), str(zip), str(both), str(parsing), str(po), str(nine), str(full)]) + '\n')
+			nine = len(filter(has_negative_number, all_lines))
+			bad_zip = len(filter(incomplete_zip, all_lines))
+			output.write(','.join([region, str(lines), str(good), str(city), str(zip), str(both), str(parsing), str(po), str(nine), str(full), str(bad_zip)]) + '\n')
 			if args.summary:
 				#recording data about statewide files
 				if region.lower() == 'statewide.csv' or region.lower() == '_loveland.csv':
